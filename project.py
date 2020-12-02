@@ -1,14 +1,34 @@
 import mysql.connector as sq
 from prettytable import PrettyTable as pt
 import math
-e=input("New setup ? y/n:")
+
+name_of_store = '''
+\t\t _  _  ____  ___  ____     ___    __    ____  ____ 
+\t\t( \( )(_  _)/ __)( ___)   / __)  /__\  ( ___)( ___)
+\t\t )  (  _)(_( (__  )__)   ( (__  /(__)\  )__)  )__) 
+\t\t(_)\_)(____)\___)(____)   \___)(__)(__)(__)  (____)                                     
+'''
+print(name_of_store)
+print(f"{'':_^90s}")
+# exit()
+e = input("New setup ? y/n: ")
+
 print()
-if e!='y':
-    con = sq.connect(host="localhost", user="root",database="project")
+
+if e != "y":
+    con = sq.connect(host="localhost", user="root", database="project")
 else:
-    con = sq.connect(host="localhost", user=input("Enter user (root): "), password=input('Enter password: '), database="kushagra_project")
+    con = sq.connect(
+        host="localhost",
+        # user=input("Enter user (root): "),
+        # password=input("Enter password: "),
+        user = 'root',
+        password = 'origami',
+        database="kushagra_project",
+    )
 
 cur = con.cursor()
+
 
 def table_print(y):
     cur.execute("Select * from {}".format(y))
@@ -34,7 +54,7 @@ def table_print(y):
 # a=cur.fetchall()
 # print(a)
 
-ask = input("Are you already registered ? (Y/N)")
+ask = input("Are you already registered ? (Y/N): ")
 print()
 a = 1
 b = 1
@@ -43,7 +63,7 @@ while b == 1:
         print("Please give your login details\n")
         # verifying the userid
         while a == 1:
-            enterid = str(input("Enter your userid "))
+            enterid = str(input("Enter your userid: "))
             print()
             tup = (enterid,)
             cur.execute("Select CustID from cust_details")
@@ -57,7 +77,7 @@ while b == 1:
             else:
                 print("No userid found\n")
 
-        psswd = input('Enter you password: ')
+        psswd = input("Enter you password: ")
         print()
         check = (enterid, psswd)
         cur.execute("Select CustID, pass from cust_details")
@@ -67,77 +87,90 @@ while b == 1:
         while a == 1:
             for j in varp:
                 if j == check:
-                    print('Password verified\n')
+                    print("\nPassword verified\n")
                     a = 2
                     break
             else:
                 print("Incorrect Password\n")
-                psswd = input("Please type the correct password : ")
+                psswd = input("Please type the correct password: ")
                 check = (enterid, psswd)
                 h += 1
                 if h > 2:
-                    print("You entered the wrong password too many times, create a new id\n")
+                    print(
+                        "You entered the wrong password too many times, create a new id\n"
+                    )
                     ask = "n"
         b = 2
 
     elif ask == "N" or ask == "n":
         print("Enter your details\n")
-        name = input('Enter your name : ')
+        name = input("Enter your name: ")
         print()
-        phoneno = str(input('Enter your phone number : '))
+        phoneno = str(input("Enter your phone number: "))
         print()
 
         while True:
             if len(phoneno) == 10:
-                print('phone number verified')
+                print("phone number verified\n")
                 break
             else:
-                print('Invalid Phone No. :)(Your Phone number should contain 10 digits)\n')
-                phoneno = str(input('Please enter a valid Phone No : '))
+                print(
+                    "Invalid Phone No. :)(Your Phone number should contain 10 digits)\n"
+                )
+                phoneno = str(input("Please enter a valid Phone No: "))
                 print()
-        email = input('Enter your email address : ')
+        email = input("Enter your email address: ")
         print()
-        add = input('Enter your address : ')
+        add = input("Enter your address: ")
         print()
         while True:
-            pincode = input('Enter the pincode of your area : ')
+            pincode = input("Enter the pincode of your area: ")
             try:
                 int(pincode)
                 break
             except:
-                print('enter correct pincode')            
+                print("Enter correct pincode")
         print()
 
         user_id = "GS" + name[0:3] + phoneno[0:4]
-        print('Your Grocery Express Userid is', user_id+'\n')
-        psswd = input('Enter your password: ')
+        print("Your Grocery Express Userid is", user_id + "\n")
+        psswd = input("Enter your password: ")
         print()
-        recheck = input('Please re-enter your password:')
+        recheck = input("Please re-enter your password: ")
 
         while True:
             if psswd == recheck:
-                print('Password verified\n')
+                print("Password verified\n")
                 break
             else:
-                print('please renter your password\n')
-                recheck = input('Renter your password: ')
+                print("please renter your password\n")
+                recheck = input("Renter your password: ")
                 print()
         # Entering the data given by user into the Database
-        query1 = ("Insert into cust_details values(%s, %s, %s, %s, %s, %s, %s)")
+        query1 = "Insert into cust_details values(%s, %s, %s, %s, %s, %s, %s)"
         cur.execute(query1, (user_id, name, add, email, pincode, phoneno, psswd))
         con.commit()  # veeeery important
         b = 2
     else:
-        ask = input("Are you already registered ? (Please Enter either Y or N) ")
+        ask = input("Are you already registered ? (Y or N): ")
         print()
 try:
-    cur.execute('select name from cust_details where CustID="{}"'.format(enterid))
+    cur.execute('select name, CustID from cust_details where CustID="{}"'.format(enterid))
     z = cur.fetchall()
     name = z[0][0]
+    user_id = z[0][1]
 except:
-    name=user_id
+    name = user_id
 
-print("Hi! {}".format(name),'\n')
+def get_voucher(id_of_user):
+    cur.execute(f'select Value from gifts where CustID="{user_id}";')
+    data = cur.fetchall()
+    if len(data) != 0:
+        return data[0][0]
+    else:
+        return 0
+
+print("Hi! {}".format(name), "\n")
 input("Please press enter")
 print()
 print(table_print("Menu_1"))
@@ -150,10 +183,10 @@ cur.execute("select SNACKS, Price from Menu_2;")
 dict_2 = dict(cur.fetchall())
 
 list_1 = []
-ans = 'y'
+ans = "y"
 
 
-def check(x):
+def checker(x):
     z = list(x.capitalize())
     w = ""
     for i in range(len(z)):
@@ -170,38 +203,45 @@ def check(x):
     elif x in dict_2:
         list_1.append(x)
     else:
-        print("Sorry sir, We do not have ", x, ' in stock yet, Leave your requests in the feedback section.\n')
+        print(
+            "Sorry sir, We do not have ",
+            x,
+            " in stock yet, Leave your requests in the feedback section.\n",
+        )
+
 
 while True:
-    while ans == 'y':
-        o = input("\nWhat do you want to purchase, Sir?  :-  ")
+    while ans == "y":
+        o = input("\nWhat do you want to purchase, Sir? :  ")
         print()
-        check(o)
-        ans = input("Want something else, Sir(Y/N) : ")
+        checker(o)
+        ans = input("Want something else, Sir(Y/N): ")
         print()
     else:
-        yes=input('Do you want to continue shopping ? (y/n): ')
-        if yes!='y':
+        yes = input("Do you want to continue shopping ? (y/n): ")
+        if yes != "y":
             break
         else:
-            ans=yes
+            ans = yes
             pass
 print()
 
-print(list_1)
+# print(list_1) #good for debugging
 
 print()
 
 
 def quant(y):
     for i in range(len(y)):
-        a = int(input('Quantity of item ' + y[i] + " "))
+        a = int(input("Quantity of item " + y[i] + ": "))
         print()
         list_2[i] = a
 
 
 def feed():
-    a = input("Please tell us about your visit, suggestions, complaints or requests : \n")
+    input(
+        "Please tell us about your visit, suggestions, complaints or requests: \n"
+    )
     print("Thank you for you cooperation, we will get back to you as soon as possible ")
 
 
@@ -236,11 +276,21 @@ if len(list_1) != 0:
             str(list_1[n - 1]) in dict_1
             list_3[n][4] = list_2[n - 1] * dict_1[str(list_1[n - 1])]
             sum += list_2[n - 1] * dict_1[str(list_1[n - 1])] * (1 + (18 / 100))
-            list_3[n][5] = "Rs." + str(list_2[n - 1] * dict_1[str(list_1[n - 1])] * (1 + (18 / 100)))[:13]
+            list_3[n][5] = (
+                "Rs."
+                + str(list_2[n - 1] * dict_1[str(list_1[n - 1])] * (1 + (18 / 100)))[
+                    :13
+                ]
+            )
         except:
             list_3[n][4] = list_2[n - 1] * dict_2[str(list_1[n - 1])]
             sum += list_2[n - 1] * dict_2[str(list_1[n - 1])] * (1 + (18 / 100))
-            list_3[n][5] = "Rs." + str(list_2[n - 1] * dict_2[str(list_1[n - 1])] * (1 + (18 / 100)))[:13]
+            list_3[n][5] = (
+                "Rs."
+                + str(list_2[n - 1] * dict_2[str(list_1[n - 1])] * (1 + (18 / 100)))[
+                    :13
+                ]
+            )
 
     y = pt()
 
@@ -249,23 +299,55 @@ if len(list_1) != 0:
     for i in range(len(list_3[0])):
         b.append(list_3[0][i])
     y.field_names = b
-    
-    for i in range(1,len(list_3)):
+
+    for i in range(1, len(list_3)):
         try:
-            list_3[i][1]+=' ({})'.format(str(dict_1[list_1[i-1]]))
+            list_3[i][1] += " ({})".format(str(dict_1[list_1[i - 1]]))
         except:
-            list_3[i][1]+=' ({})'.format(str(dict_2[list_1[i-1]]))
-            
+            list_3[i][1] += " ({})".format(str(dict_2[list_1[i - 1]]))
+
     for k in range(1, len(list_3)):
         y.add_row(list_3[k])
 
     print(y)
     print()
-    print('Your total bill is Rs.', round(sum))
+    voucher = get_voucher(user_id)
+    if voucher != 0:
+        print(f"Applying your voucher of Rs.{voucher} \n")
+        final_amount = round(sum) - voucher
+    else:
+        print("FREE TIP! Shop for Rs. 500 or more to get special discounts\n")
+        final_amount = round(sum)
+        pass
+    print("Your total bill is Rs.", final_amount)
     print()
-    print("Thank you for the visit", name+'\n')
+    print("Collect your recipt at the counter.\n")
+    print("Thank you for the visit", name + "\n")
     print("Please Enter feedback and you can cllect your bill \n ")
-    with open("{}_bill.txt".format(name), "w") as f:
-        f.writelines(['{:_^88s}\n\n'.format('Thank you for shopping with us !'),str(y)+'\n','The total payable amount is: '+str(round(sum))])
+    voucher_maybe = f"Congratulations!! You got discount of Rs.{voucher} on you bill of Rs.{round(sum)}\n" if voucher != 0 else ''
+    with open("{}_bill.txt".format(name), "a") as f:
+        f.writelines(
+            [
+                "{:_^88s}\n\n".format("Thank you for shopping with us !"),
+                str(y) + "\n",
+                voucher_maybe,
+                "The total payable amount is: " + f"Rs.{str(final_amount)}/- " + "\n\n\n",
+            ]
+        )
     feed()
-print('\nLookin\' forward to you next visit !')
+    def get_random():
+        from random import randint
+        return randint(10,90)
+    if final_amount >= 500:
+        print('\nYou are elegible for our gift voucher. Shop again to claim it.')
+        cur.execute('select CustID, Value from gifts;')
+        for i in cur.fetchall():
+            if user_id in i:
+                cur.execute(f'update gifts set Value={get_random()} where CustID="{user_id}";')
+                con.commit()
+                break
+        else:
+            cur.execute(f'insert into gifts values(1,"{user_id}", "off rupees", {get_random()});')
+            con.commit()
+    con.close()
+print("\nLookin' forward to you next visit !")
